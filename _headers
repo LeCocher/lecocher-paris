@@ -1,0 +1,27 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Empêche le site d'être chargé dans une iframe (clickjacking)
+    X-Frame-Options = "DENY"
+    # Empêche le sniffing de type MIME
+    X-Content-Type-Options = "nosniff"
+    # Protection XSS navigateurs anciens
+    X-XSS-Protection = "1; mode=block"
+    # Contrôle du referrer
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # HSTS : force HTTPS pour 1 an
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    # Permissions : désactive caméra, micro, géoloc non autorisés
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=()"
+    # Content Security Policy
+    Content-Security-Policy = "default-src 'self' https://maps.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.netlify.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://maps.googleapis.com https://maps.gstatic.com https://streetviewpixels-pa.googleapis.com; frame-ancestors 'none';"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
