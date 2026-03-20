@@ -1546,45 +1546,51 @@
     e.preventDefault();
     var form = document.getElementById('form-resa');
     var data = new FormData(form);
-    fetch("/", {
+
+    // Récupérer les prix calculés
+    var prixEco     = document.getElementById("prix-eco").textContent;
+    var prixBerline = document.getElementById("prix-berline").textContent;
+    var prixVan     = document.getElementById("prix-van").textContent;
+
+    // Si prix pas calculé, utiliser les minimums
+    if (prixEco === "—" || prixEco === "") prixEco = "29€";
+    if (prixBerline === "—" || prixBerline === "") prixBerline = "39€";
+    if (prixVan === "—" || prixVan === "") prixVan = "49€";
+
+    // Récupérer la catégorie choisie
+    var cat = document.getElementById("sel-categorie") ? document.getElementById("sel-categorie").value : "Éco";
+    var prixChoisi = cat === "Berline" ? prixBerline : cat === "Van" ? prixVan : prixEco;
+
+    // Afficher le wizard immédiatement
+    form.style.display = "none";
+    var box = document.getElementById("confirm-box");
+    box.style.display = "block";
+    box.scrollIntoView({ behavior: "smooth" });
+
+    // Remplir les champs du wizard
+    var catLabel = document.getElementById("confirm-cat-label");
+    var catPrix  = document.getElementById("confirm-cat-prix");
+    if (catLabel) catLabel.innerHTML = "Option choisie : <strong>" + cat + "</strong>";
+    if (catPrix) catPrix.textContent = prixChoisi;
+
+    // Remplir tous les prix
+    var cpEco = document.getElementById("cp-eco");
+    var cpBerline = document.getElementById("cp-berline");
+    var cpVan = document.getElementById("cp-van");
+    if (cpEco) cpEco.textContent = prixEco;
+    if (cpBerline) cpBerline.textContent = prixBerline;
+    if (cpVan) cpVan.textContent = prixVan;
+
+    // Démarrer à l'étape 1
+    goStep(1);
+
+    // Envoyer en arrière-plan
+    fetch("https://formspree.io/f/xpwzgvqe", {
       method: "POST",
+      headers: { "Accept": "application/json" },
       body: data
-    })
-    .then(function() {
-      form.style.display = "none";
-      var box = document.getElementById("confirm-box");
-      box.style.display = "block";
-      box.scrollIntoView({ behavior: "smooth" });
+    }).catch(function() { console.log("Erreur envoi"); });
 
-      // Récupérer les prix calculés
-      var prixEco     = document.getElementById("prix-eco").textContent;
-      var prixBerline = document.getElementById("prix-berline").textContent;
-      var prixVan     = document.getElementById("prix-van").textContent;
-
-      // Récupérer la catégorie choisie
-      var cat = document.getElementById("sel-categorie") ? document.getElementById("sel-categorie").value : "Éco";
-      var prixChoisi = cat === "Berline" ? prixBerline : cat === "Van" ? prixVan : prixEco;
-
-      // Remplir les champs du wizard
-      var catLabel = document.getElementById("confirm-cat-label");
-      var catPrix  = document.getElementById("confirm-cat-prix");
-      if (catLabel) catLabel.innerHTML = "Option choisie : <strong>" + cat + "</strong>";
-      if (catPrix && prixChoisi !== "—") catPrix.textContent = prixChoisi;
-
-      // Remplir tous les prix
-      var cpEco = document.getElementById("cp-eco");
-      var cpBerline = document.getElementById("cp-berline");
-      var cpVan = document.getElementById("cp-van");
-      if (cpEco && prixEco !== "—") cpEco.textContent = prixEco;
-      if (cpBerline && prixBerline !== "—") cpBerline.textContent = prixBerline;
-      if (cpVan && prixVan !== "—") cpVan.textContent = prixVan;
-
-      // Démarrer à l'étape 1
-      goStep(1);
-    })
-    .catch(function() {
-      alert("Erreur lors de l'envoi, veuillez réessayer.");
-    });
     return false;
   }
 
@@ -1613,6 +1619,12 @@
 
   // FAQ
   function toggleFaq(el) {
+    const item = el.closest('.faq-item');
+    if (!item) return;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
 
   // FILTRES TARIFS
   function showTab(cat, el) {
@@ -1703,26 +1715,20 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var data = new FormData(form);
-    fetch("/", {
+    // Afficher directement le wizard sans attendre la réponse
+    form.style.display = "none";
+    var box = document.getElementById("confirm-box");
+    if (box) { box.style.display = "block"; box.scrollIntoView({ behavior: "smooth" }); }
+    if (typeof goStep === 'function') goStep(1);
+    // Envoyer en arrière-plan
+    fetch("https://formspree.io/f/xpwzgvqe", {
       method: "POST",
+      headers: { "Accept": "application/json" },
       body: data
-    })
-    .then(function() {
-      form.style.display = "none";
-      var box = document.getElementById("confirm-box");
-      if (box) { box.style.display = "block"; box.scrollIntoView({ behavior: "smooth" }); }
-    })
-    .catch(function() {
-      alert("Erreur, veuillez réessayer ou nous contacter par WhatsApp.");
-    });
+    }).catch(function() { console.log("Erreur envoi formulaire"); });
   });
 });
 </script>
 
 </body>
-</html>  
-</script>
-
-<!-- SÉCURITÉ CLIENT -->
-<script>
-  // Anti-devtools b
+</html>
